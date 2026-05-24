@@ -149,7 +149,7 @@ Realized onboarding is `goal → ability → age → frequency → days → sche
 - Button text dynamic: "Pick N more day(s)" (disabled) → "Continue" (armed orange) when count met
 - No reactive alerts, no "are you sure?" — information not warnings
 
-**Sketch file:** `Available-days.html` *(update with final sketch ID once exported)*
+**Sketch file:** `Availability.html`
 
 ---
 
