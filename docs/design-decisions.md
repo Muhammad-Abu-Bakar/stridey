@@ -153,15 +153,75 @@ Realized onboarding is `goal → ability → age → frequency → days → sche
 
 ---
 
-### Screens 7–12 — Pending
-- 7: Start date (Today/Tomorrow/Custom)
-- 8: Units (km/mi)
-- 9: Plan summary
+### Screen 7 — Start date
+**Reference:** Runna's start-date screen — Today / Tomorrow (default-selected, with date shown above the label) / Custom (with inline date picker drum). Teal selection color (off-system).
+
+**Differentiation chosen:** Option A — three separate cards in established stack vocabulary. Tomorrow pre-selected with "Recommended" pill (data framing, not paternalistic "we recommend"). Today and Tomorrow show their concrete dates beneath the label (label first, date second — opposite of Runna's order). Custom card has chevron, opens native Material 3 date picker (deferred to Claude Code phase). Killed teal color drift — orange primary only. Dropped the ? help icon.
+
+**Final headline:** "When should we begin?"
+**Subhead:** "You can change this anytime."
+
+**Cards:**
+1. **Today** — Sun, May 24
+2. **Tomorrow** — Mon, May 25 [RECOMMENDED pill, pre-selected]
+3. **Pick a date** — Tap to choose [chevron, opens native date picker]
+
+**Live microcopy under cards:** "Plan ends [computed date]." Fades in on selection. Computed from start date + plan duration (which varies by goal + frequency).
+
+**Implementation notes:**
+- Plan-end-date calculation is hardcoded in the prototype as an example. In Claude Code phase, must compute live from `userOnboardingStore` state (goal + frequency + start date).
+- Custom date picker uses `@react-native-community/datetimepicker` — see Implementation Notes section. Do NOT build a custom inline calendar.
+- Date constraint: soft floor at today (no past dates). No upper cap — trust the user.
+
+**Sketch file:** `When-should-we-begin.html` (verify in Claude Design file browser)
+
+---
+
+### Screen 8 — Units (miles or kilometres)
+**Reference:** Runna's "Which units would you like your plan to be generated in?" — two options ("Optimized for Miles / Tempo 2mi" and "Optimized for Kilometers / Tempo 3km") + Continue button. Wordy headline, jargon in examples ("Tempo"), 47-word subhead restating the question.
+
+**Differentiation chosen:** Option A — card stack with example session inside each card. Real plan copy as the example ("Easy run · 3 mi" / "Easy run · 5 km") instead of training jargon. Locale-defaulted pre-selection (prototype hardcoded to Miles; Claude Code phase uses expo-localization). Tap-to-advance (reversible decision deserves lightness). Subhead cut entirely. Killed teal selection color.
+
+**Final headline:** "Miles or kilometres?"
+**No subhead** — headline + card examples carry the meaning.
+
+**Cards:**
+1. **Miles** — Easy run · 3 mi [pre-selected for US/UK/LR/MM locales]
+2. **Kilometres** — Easy run · 5 km [pre-selected for everywhere else]
+
+**Bottom microcopy:** "Change later in Settings → Units."
+
+**Implementation notes:**
+- Locale check in Claude Code phase — see "Locale-defaulted unit preference" in Implementation Notes section.
+- Once units is set here, all downstream screens display in user's preference. Dual-unit displays from earlier screens (e.g. "3K (2 miles)" on ability screen 3) are no longer needed after this point.
+
+**Sketch file:** `Miles-or-kilometres.html` (verify in Claude Design file browser)
+
+---
+
+### Screen 9 — Plan summary (the first hero moment)
+**Reference:** Runna's "Your plan is nearly ready!" — photo hero + plan badge + plan name + meta + bullet list of user's selections + "Generate my plan" CTA.
+
+**Differentiation chosen:** Option B — hero photo + unified summary card with WeekStrip in specific-days read-only mode (third deployment of the primitive). No plan badge (restraint — we don't sell plans). No "your plan is ready!" headline (visual carries it). Fixed single screen, no scroll — commit moment requires immediate CTA visibility. Picks not editable in place (back arrow handles revision).
+
+**Plan content shown (v1 example):**
+- Plan name: First 5K Plan
+- Duration: 8 weeks · Mon, May 25 → Sun, Jul 19
+- Stat row: 24 SESSIONS · 30 MIN PER SESSION · MILES UNITS
+- "YOUR WEEK" WeekStrip: Mon, Wed, Sat filled (read-only specific-days mode, with day labels)
+
+**CTA:** "Build my plan" — action-as-result, unambiguous
+
+**EXPORT FORMAT NOTE:** Saved as PNG instead of PDF because Claude Design weekly limit was hit before Save as PDF could be used. PNG is sufficient as a design record. Regenerate as PDF and replace `09-plan-summary.png` with `09-plan-summary.pdf` in a later commit when the design limit resets.
+
+**Sketch file:** `Plan-summary.html`
+
+---
+
+### Screens 10–12 — Pending (blocked on Claude Design weekly limit)
 - 10: Building plan loader
 - 11: Account creation (no Runna reference — design from scratch)
 - 12: Permissions — location + notifications (no Runna reference — design from scratch)
-
----
 
 ## Reusable Design Primitives
 
