@@ -257,6 +257,14 @@ Several screens have copy that varies based on the user's screen-2 goal selectio
 ### Date pickers
 Use @react-native-community/datetimepicker for Custom date selection on screen 7 (Start date). It wraps the native Android Material 3 date picker on Android and the iOS spinner on iOS. Do NOT build a custom inline calendar component — the native dialog is accessible, well-tested, and free.
 
+### Locale-defaulted unit preference
+Screen 8 (Units) defaults to Miles or Kilometres based on device locale. 
+In Claude Code phase use expo-localization:
+  import * as Localization from 'expo-localization';
+  const region = Localization.getLocales()[0]?.regionCode;
+  const defaultUnit = ['US', 'GB', 'LR', 'MM'].includes(region) ? 'mi' : 'km';
+The prototype hardcodes Miles as default — replace with the above 
+check at implementation time.
 ---
 
 ## Deferred to v1.0.1 or Later — Do Not Forget
