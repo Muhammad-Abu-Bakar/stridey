@@ -254,6 +254,9 @@ Several screens have copy that varies based on the user's screen-2 goal selectio
 - Plan recommendation screen (when designed)
 - Plan summary screen
 
+### Date pickers
+Use @react-native-community/datetimepicker for Custom date selection on screen 7 (Start date). It wraps the native Android Material 3 date picker on Android and the iOS spinner on iOS. Do NOT build a custom inline calendar component — the native dialog is accessible, well-tested, and free.
+
 ---
 
 ## Deferred to v1.0.1 or Later — Do Not Forget
