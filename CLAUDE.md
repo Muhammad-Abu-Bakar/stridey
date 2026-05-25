@@ -1,10 +1,21 @@
-# CLAUDE.md
-
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project status
 
-Design phase complete (12/12 onboarding screens). Code scaffold not yet started. When the Expo project is initialized, commands will be added here.
+Design phase complete (12/12 onboarding screens).
+
+Code phase in progress:
+- Expo + TypeScript scaffold complete (c033fcc)
+- 9 core libraries installed (df2d7d5): @supabase/supabase-js, zustand, @react-native-async-storage/async-storage, expo-localization, @react-native-community/datetimepicker, expo-location, expo-notifications, expo-auth-session, expo-crypto
+- `react-native-url-polyfill` installed for Supabase URL constructor support in the RN runtime (a2a1763)
+- Supabase project live: schema applied (5 tables with RLS enabled), credentials in `.env` using new `sb_publishable_` key format (not legacy anon JWT)
+- Supabase client at `lib/supabase.ts` with AsyncStorage session persistence, `autoRefreshToken: true`, `detectSessionInUrl: false` (RN uses deep links, not URL hash fragments)
+
+Next: build shared primitives (WeekStrip first), then the 12 onboarding screens.
+
+## Commands
+
+Standard Expo scripts: `npm start`, `npm run android`, `npm run ios`, `npm run web`. Run `npx expo-doctor` periodically to verify SDK and package alignment.
 
 ## Stack
 
@@ -30,13 +41,15 @@ On the final screen (permissions), write state to Supabase `profiles` + `user_pl
 
 ### Supabase schema (5 tables)
 
+Schema is **live** in the production Supabase project — see `docs/supabase-schema.sql` for the canonical DDL.
+
 - `profiles` — user settings (units: `km`|`mi`, display_name); linked to `auth.users`
 - `plan_templates` — 8 seed plans (4 goals × 2 frequency variants); public read
 - `user_plans` — user's active/completed/abandoned plan instances
 - `plan_sessions` — individual scheduled sessions within a plan
 - `runs` — GPS-recorded runs, optionally linked to a plan session
 
-All tables have RLS enabled. `age_bracket` is intentionally absent.
+All tables have RLS enabled. `age_bracket` is intentionally absent (privacy promise on screen 4).
 
 ### Auth
 
