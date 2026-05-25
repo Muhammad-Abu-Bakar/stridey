@@ -10,6 +10,7 @@ Code phase in progress:
 - `react-native-url-polyfill` installed for Supabase URL constructor support in the RN runtime (a2a1763)
 - Supabase project live: schema applied (5 tables with RLS enabled), credentials in `.env` using new `sb_publishable_` key format (not legacy anon JWT)
 - Supabase client at `lib/supabase.ts` with AsyncStorage session persistence, `autoRefreshToken: true`, `detectSessionInUrl: false` (RN uses deep links, not URL hash fragments)
+- Smoke-tested via `npm start` + web preview: clean boot, no console errors
 
 Next: build shared primitives (WeekStrip first), then the 12 onboarding screens.
 
@@ -21,7 +22,7 @@ Standard Expo scripts: `npm start`, `npm run android`, `npm run ios`, `npm run w
 
 - **React Native + Expo + TypeScript** — Android primary, iOS secondary
 - **Supabase** — auth, PostgreSQL database, Row Level Security
-- **Expo Router** — navigation (to be confirmed at scaffold time)
+- **Expo Router** with `src/app/` directory layout (confirmed via scaffold)
 
 ## Repo discipline
 
