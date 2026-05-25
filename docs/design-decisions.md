@@ -277,8 +277,48 @@ Realized onboarding is `goal → ability → age → frequency → days → sche
 
 ---
 
-### Screen 12 — Pending
-- 12: Permissions — location + notifications (no Runna reference — design from scratch)
+### Screen 12 — Permissions (the final screen of onboarding)
+**Reference:** None — designed from scratch within Stridey's design system.
+
+**Differentiation chosen:** Option A — one screen with two cards, per-card Allow buttons, bottom Continue button with state-dependent copy. Made permission asymmetry visible without being threatening (Location carries muted "Required" tag, Notifications has none). Soft-block fallback for location refusal (home-screen banner, never hard-block). Respect-the-no for notifications (no in-app re-prompts).
+
+**Three states delivered in build (all visible in export):**
+1. DEFAULT — neither asked, both cards in "Allow" state, Continue button muted/disabled
+2. BOTH GRANTED — both cards tinted orange with "Granted ✓", Continue armed in primary orange
+3. MIXED — one granted, one denied, Continue text flips to "Continue anyway"
+
+**Headline:** "Two last things"
+**Subhead:** "We'll ask Android for permission. You can change these anytime in Settings."
+
+**Cards:**
+1. **Location** [REQUIRED tag, muted grey]
+   - Icon: path glyph (pin marker + route trail)
+   - Copy: "Track your runs and map your route."
+   - Button states: "Allow location" → "Granted ✓"
+2. **Notifications** [no tag]
+   - Icon: path glyph (concentric circles, beat metaphor)
+   - Copy: "A daily reminder about today's session. No spam."
+   - Button states: "Allow notifications" → "Granted ✓"
+
+**Bottom CTA copy logic:**
+- "Continue" — when both granted or only Required (location) granted
+- "Continue anyway" — when either denied
+- Muted/disabled — when neither has been asked yet (force interaction)
+
+**Refusal handling architecture:**
+- **Location denied:** Soft-proceed to home. Home screen shows a banner "Enable location to record runs" with tap-to-fix that re-opens the permission flow. Do NOT strip down the home screen — user can still view plan, schedule, etc.
+- **Notifications denied:** Soft-proceed silently. NEVER re-prompt in-app. Re-enable path exists only via Settings → Profile → Notifications.
+- **Both denied:** Same as above — let them in.
+
+**Implementation notes for Claude Code phase:**
+- Android 13+ requires runtime POST_NOTIFICATIONS permission; older Android grants implicitly
+- Location: ACCESS_FINE_LOCATION only (precise, not approximate)
+- Do NOT request ACCESS_BACKGROUND_LOCATION in v1 — avoids Play Store background-location justification flow and keeps Privacy Policy simple
+- Libraries: `expo-location` for GPS permission, `expo-notifications` for push permission
+- After this screen advances, navigate to `/home` (replace, don't push — onboarding stack should be cleared from history)
+- Persist permission grant state to AsyncStorage so the app knows on cold-start which permissions were ever granted
+
+**Sketch file:** `Permissions.html` (verify in Claude Design file browser)
 
 ## Reusable Design Primitives
 
