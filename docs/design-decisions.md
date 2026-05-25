@@ -240,8 +240,44 @@ Realized onboarding is `goal → ability → age → frequency → days → sche
 
 ---
 
-### Screens 11–12 — Pending
-- 11: Account creation (no Runna reference — design from scratch)
+### Screen 11 — Account creation
+**Reference:** None — designed from scratch within Stridey's design system. First screen in onboarding without a Runna reference.
+
+**Differentiation chosen:** Option A — single primary path (Google one-tap), email as text-link disclosure that expands additively (Google button remains visible after email opens). Plan chip at top with mini WeekStrip as the 5th deployment of the primitive — makes the "asset being saved" visible, not just named. Headline "Save your First 5K Plan" reframes account creation as plan protection, not a sign-up wall.
+
+**Default state (email collapsed):**
+- Plan chip: "First 5K Plan · 8 weeks" + miniature WeekStrip (Mon/Wed/Sat filled)
+- Headline: "Save your First 5K Plan"
+- Subhead: "Create an account so your plan syncs and won't get lost."
+- T&C microcopy: "By continuing, you agree to our Terms and Privacy Policy." (linked, 12sp, dim)
+- Primary CTA: "Continue with Google" (white button, G logo)
+- Text link below: "Use email instead"
+
+**Email-expanded state:**
+- Same plan chip, headline, subhead
+- T&C moves above the Google button
+- Google button still visible (additive expansion)
+- "Hide email form" toggle to collapse
+- Email field (placeholder: "you@email.com")
+- Password field (placeholder: "At least 8 characters")
+- "Forgot password?" right-aligned under password field
+- Primary CTA flips to "Continue with email" (orange)
+
+**Implementation notes:**
+- Google sign-in: expo-auth-session + expo-crypto for OAuth flow, Supabase Auth as the backend
+- Password rule: 8+ characters, NO complexity regex (NIST 800-63B aligned). Add haveibeenpwned breach check in v1.x
+- Forgot password: required for v1, sends Supabase magic link reset email
+- No display name collected here — defer to settings screen
+- Loading: spinner inside the button (replaces label), not a full-screen overlay
+- Errors: toast for auth failures (top of screen), inline-below-field for validation
+- Success: no intermediate "Welcome!" screen — advance directly to screen 12 (permissions)
+- Apple sign-in deferred to iOS launch (mandatory per Apple's third-party-login rule)
+
+**Sketch file:** `Account-create.html` (verify in Claude Design file browser)
+
+---
+
+### Screen 12 — Pending
 - 12: Permissions — location + notifications (no Runna reference — design from scratch)
 
 ## Reusable Design Primitives
@@ -347,6 +383,9 @@ In Claude Code phase use expo-localization:
 The prototype hardcodes Miles as default — replace with the above 
 check at implementation time.
 ---
+### Authentication
+v1 ships with Email + Google sign-in via Supabase Auth. Account required to use the app. Apple sign-in added at iOS launch time (mandatory per Apple's rule: any third-party social login requires Apple sign-in alongside it). Library: @supabase/supabase-js for the client, expo-auth-session + expo-crypto for Google OAuth flow.
+
 
 ## Deferred to v1.0.1 or Later — Do Not Forget
 
@@ -368,7 +407,12 @@ check at implementation time.
 - **v1.0.1** = bug fixes + top user-requested feature only
 - **v1.0.2** = bug fixes + next top user-requested feature
 - Major features go in v1.1, v1.2, etc., not in patch releases
-
+- Primary path: Google sign-in (Android one-tap via expo-auth-session)
+- Secondary path: Email + password (Supabase Auth direct)
+- Password rule: 8+ characters, no complexity regex (NIST 800-63B aligned)
+- Forgot password: required for v1, surfaced as text link under password field
+- No display name collected during signup; profile naming deferred to settings screen later
+- T&C / Privacy Policy links surfaced above primary CTA (legal requirement)
 ---
 
 ## How to maintain this file
