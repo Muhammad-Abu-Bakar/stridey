@@ -218,8 +218,29 @@ Realized onboarding is `goal → ability → age → frequency → days → sche
 
 ---
 
-### Screens 10–12 — Pending (blocked on Claude Design weekly limit)
-- 10: Building plan loader
+### Screen 10 — Building plan loader (with error state)
+**Reference:** Runna's "Building your plan" — single circular spinner with small horizontal progress bar, single static headline, no phasing, no error state shown.
+
+**Differentiation chosen:** Option B — WeekStrip animated fill as the loader. Fourth deployment of the WeekStrip primitive (animated mode). User's selected days fill in their selection order (Mon → Wed → Sat) first in orange, then remaining days fill in muted grey. Three phased headlines pacing ~900ms each (total ~2.7s): "Mapping your week" → "Choosing your sessions" → "Calibrating to your pace." Error state designed and rendered (not just spec'd).
+
+**Pacing rules:**
+- Target 2.4–3.0s, hard cap 4s
+- Real Supabase work (200–500ms) completes inside phase 1
+- If network slower than floor, extend final phase only — never early phases
+- No skip button (defeats the "carefully crafted" feeling)
+
+**Error state:** 6s soft timeout → broken-line path glyph (callback to trajectory family), "We hit a snag" headline, "Your answers are saved — let's try again" subhead, primary CTA "Retry" (re-fires Supabase call), secondary text-button "Use a starter plan" (falls back to stock template matching user's goal slug).
+
+**Implementation notes:**
+- WeekStrip needs a new animated mode (timed fill from selectedDays array, then complete with greyed remainder). Extend week-strip.jsx API with `animateFillFrom: number[]` and `animateRemainderAfter: number` (ms).
+- Phased headlines: use React state machine with setTimeout, swap text with crossfade transition.
+- Error state separate component but reuses path glyph language.
+
+**Sketch file:** `Building-plan.html` (verify in Claude Design file browser)
+
+---
+
+### Screens 11–12 — Pending
 - 11: Account creation (no Runna reference — design from scratch)
 - 12: Permissions — location + notifications (no Runna reference — design from scratch)
 
