@@ -48,3 +48,6 @@ logs/
 # Test artefacts
 coverage/
 .nyc_output/
+
+# Claude Code local config (per-machine, do not commit)
+.claude/
