@@ -24,6 +24,17 @@ Standard Expo scripts: `npm start`, `npm run android`, `npm run ios`, `npm run w
 - **Supabase** — auth, PostgreSQL database, Row Level Security
 - Expo Router with src/app/ directory layout, organised into route groups (see "Project structure" below)
 
+## Project structure
+
+- src/app/_layout.tsx — root Stack with ThemeProvider, font gate, AnimatedSplashOverlay
+- src/app/(tabs)/_layout.tsx — wraps AppTabs (NativeTabs); children: index.tsx, explore.tsx
+- src/app/(onboarding)/_layout.tsx — Stack with no header; onboarding screens added one per commit
+- src/app/sandbox.tsx — dev-only WeekStrip smoke test, reachable at /sandbox
+- src/components/app-tabs.tsx + app-tabs.web.tsx — tab bar with web platform variant
+- src/components/week-strip.tsx — three-mode primitive (cadence | specific-days read-only | specific-days interactive)
+- src/theme/index.ts — canonical design tokens (palette, fonts, sizes, spacing, radii, motion, shadows)
+- lib/supabase.ts — Supabase client (currently at repo root; planned move to src/lib/, tracked as a separate cleanup)
+
 ## Repo discipline
 
 Commit message format: `design(screen-N): description` for design work, `feat:`, `fix:`, `docs:` for code. One commit per completed screen or feature. Push before starting the next step.
