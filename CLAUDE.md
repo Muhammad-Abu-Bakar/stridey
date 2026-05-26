@@ -12,7 +12,7 @@ Code phase in progress:
 - Supabase client at `lib/supabase.ts` with AsyncStorage session persistence, `autoRefreshToken: true`, `detectSessionInUrl: false` (RN uses deep links, not URL hash fragments)
 - Smoke-tested via `npm start` + web preview: clean boot, no console errors
 
-Next: build shared primitives (WeekStrip first), then the 12 onboarding screens.
+Next: build OnboardingCard, TopChrome, PathGlyph primitives, then the welcome screen and remaining onboarding flow.
 
 ## Commands
 
