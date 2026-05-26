@@ -2,54 +2,36 @@
 //
 // WeekStrip — 7-dot week-rhythm primitive.
 //
-// [STEP 3 COMMIT: API SURFACE ONLY. Render implementation in Step 4.]
-//
-// MODES (discriminated by props — TS enforces exactly one):
+// MODES (TS-enforced discriminated union):
 //   Cadence (read-only):       <WeekStrip filled={3} />
 //   Specific-days read-only:   <WeekStrip days={[...]} showLabels />
 //   Specific-days interactive: <WeekStrip days={[...]} onToggle={fn} />
 //
-// Used on 5 onboarding screens (5, 6, 9, 10, 11). The animated fill mode
-// for screen 10 is deferred — see DEPLOYMENT SANITY CHECK at file end.
+// Used on onboarding screens 5, 6, 9, 10, 11. Animated mode for
+// screen 10 is deferred — will require a fourth mode branch.
 
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { ViewStyle } from 'react-native';
+import { fonts, palette, primary, sizes } from '@/theme';
 
-/**
- * Length-7 boolean array, Monday-first.
- * Index 0 = Mon, 1 = Tue, ..., 6 = Sun.
- * Length is enforced at runtime in the component (Step 4).
- */
+// ─── Public types ─────────────────────────────────────────────────────
+
 export type DaysOfWeek = readonly boolean[];
 
-// ─── Mode-specific props (discriminated union) ───────────────────────
-
 type CadenceModeProps = {
-  /**
-   * Number of days to render filled (1–7). Component picks a default
-   * visually-balanced pattern (e.g. 2 → Tue/Fri, 3 → Mon/Thu/Sat).
-   * These patterns are visual rhythm only — the plan engine assigns
-   * real days later.
-   */
   filled: number;
   days?: never;
   onToggle?: never;
 };
 
 type SpecificDaysReadOnlyProps = {
-  /** Length-7 boolean array, Monday-first. true = a running day. */
   days: DaysOfWeek;
   filled?: never;
   onToggle?: never;
 };
 
 type SpecificDaysInteractiveProps = {
-  /** Length-7 boolean array, Monday-first. true = a running day. */
   days: DaysOfWeek;
-  /**
-   * Fires with the day index (0–6) when a dot is tapped. Parent owns
-   * the `days` state and decides toggle semantics (flip vs replace vs
-   * require-min-count, etc).
-   */
   onToggle: (dayIndex: number) => void;
   filled?: never;
 };
@@ -59,108 +41,191 @@ type ModeProps =
   | SpecificDaysReadOnlyProps
   | SpecificDaysInteractiveProps;
 
-// ─── Shared props (apply to all modes) ───────────────────────────────
-
 type CommonProps = {
-  /**
-   * Read-only emphasis flag. When true, filled dots render in primary
-   * color at full opacity. When false/undefined, filled dots render
-   * muted (textDim @ 50%). Ignored in interactive mode — interactive
-   * dots are always emphasized.
-   *
-   * @default false
-   */
+  /** Read-only emphasis. Filled dots use primary at full opacity when true,
+   *  textDim @ 50% when false. Ignored in interactive mode. @default false */
   selected?: boolean;
-
-  /**
-   * Render M T W T F S S labels ABOVE the dot row. Use with `days`
-   * modes. Ignored when `labelsInside` is true.
-   *
-   * @default false
-   */
+  /** Render M T W T F S S above the dot row. Ignored when labelsInside.
+   *  @default false */
   showLabels?: boolean;
-
-  /**
-   * Render each day's letter INSIDE the dot. Use for large interactive
-   * dots (availability screen) where above-dot labels would feel
-   * detached. Requires dotSize ≥ 28 to be legible.
-   *
-   * @default false
-   */
+  /** Render each day's letter inside the dot. Requires dotSize ≥ 28.
+   *  @default false */
   labelsInside?: boolean;
-
-  /**
-   * Dot diameter in dp.
-   *
-   * Suggested values from theme.sizes:
-   *   10 — weekStripDotInline (cadence/preview rhythm, default)
-   *   48 — weekStripDotInteractive (tappable editor)
-   *    6 — mini variant for the account-creation plan chip
-   *
-   * @default 10
-   */
+  /** Dot diameter in dp. @default 10 (sizes.weekStripDotInline) */
   dotSize?: number;
-
-  /**
-   * Horizontal gap between dots in dp.
-   *
-   * @default 6 (theme.sizes.weekStripGap)
-   */
+  /** Horizontal gap between dots in dp. @default 6 (sizes.weekStripGap) */
   gap?: number;
-
-  /**
-   * Style escape hatch on the outer wrapper. Use sparingly — layout
-   * should generally be handled by the parent placing <WeekStrip>.
-   */
+  /** Style escape hatch on the outer wrapper. Use sparingly. */
   style?: ViewStyle;
 };
 
 export type WeekStripProps = ModeProps & CommonProps;
 
-// ─── Component shell (returns null until Step 4) ─────────────────────
+// ─── Internal constants ───────────────────────────────────────────────
 
-export function WeekStrip(_props: WeekStripProps) {
-  // TODO(Step 4): implement rendering.
-  //   - Use Pressable for interactive mode (onPressIn/onPressOut for
-  //     scale-down haptic feedback, accessibilityRole="button",
-  //     accessibilityState={ selected }).
-  //   - Use View+Text for read-only modes.
-  //   - Import primary, palette, sizes, motion from theme module.
-  //   - Hardcode cadence patterns (Mon-first):
-  //       1: [_,_,T,_,_,_,_]  2: [_,T,_,_,T,_,_]  3: [T,_,_,T,_,T,_]
-  //       4: [T,_,T,_,T,_,T]  5: [T,T,_,T,T,_,T]  6: [T,T,T,T,T,T,_]
-  //       7: all
-  //   - Runtime assert days.length === 7 in dev only (__DEV__ guard).
-  return null;
+const LETTERS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'] as const;
+const FULL_DAYS = [
+  'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday',
+] as const;
+
+// Default cadence patterns for the 1–7 days-per-week range. Visual
+// rhythm only — the plan engine assigns real days later.
+const CADENCE: Record<number, readonly boolean[]> = {
+  1: [false, false, true,  false, false, false, false],
+  2: [false, true,  false, false, true,  false, false],
+  3: [true,  false, false, true,  false, true,  false],
+  4: [true,  false, true,  false, true,  false, true ],
+  5: [true,  true,  false, true,  true,  false, true ],
+  6: [true,  true,  true,  true,  true,  true,  false],
+  7: [true,  true,  true,  true,  true,  true,  true ],
+};
+
+const EMPTY_PATTERN: readonly boolean[] = [
+  false, false, false, false, false, false, false,
+];
+
+// ─── Component ────────────────────────────────────────────────────────
+
+export function WeekStrip(props: WeekStripProps) {
+  const {
+    selected = false,
+    showLabels = false,
+    labelsInside = false,
+    dotSize = sizes.weekStripDotInline,
+    gap = sizes.weekStripGap,
+    style,
+    days,
+    filled,
+    onToggle,
+  } = props;
+
+  // Dev-only length check on `days`. Caught during development, silent
+  // in production builds where __DEV__ is false.
+  if (__DEV__ && days !== undefined && days.length !== 7) {
+    console.warn(
+      `WeekStrip: \`days\` must be length 7, got ${days.length}. ` +
+      `Falling back to empty pattern.`
+    );
+  }
+
+  // Resolve which 7-dot pattern to render.
+  const pattern: readonly boolean[] = (() => {
+    if (days && days.length === 7) return days;
+    if (filled !== undefined) {
+      const clamped = Math.max(1, Math.min(7, Math.round(filled)));
+      return CADENCE[clamped];
+    }
+    return EMPTY_PATTERN;
+  })();
+
+  const interactive = typeof onToggle === 'function';
+  const emphasised = interactive || selected;
+
+  function renderDot(on: boolean, i: number) {
+    const dotStyle: ViewStyle = {
+      width: dotSize,
+      height: dotSize,
+      borderRadius: dotSize / 2,
+      backgroundColor: on
+        ? (emphasised ? primary : palette.text)
+        : 'transparent',
+      borderWidth: on ? 0 : sizes.weekStripBorderWidth,
+      borderColor: on
+        ? 'transparent'
+        : (emphasised ? `${primary}55` : palette.border),
+      opacity: on ? (emphasised ? 1 : 0.5) : 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+    };
+
+    const labelFontSize = labelsInside
+      ? Math.max(11, Math.round(dotSize * 0.34))
+      : 0;
+
+    const letterEl = labelsInside ? (
+      <Text
+        style={{
+          fontFamily: fonts.bodySemiBold,
+          fontSize: labelFontSize,
+          lineHeight: labelFontSize,
+          color: on ? palette.bg : palette.textDim,
+          letterSpacing: 0.02 * labelFontSize,
+        }}
+      >
+        {LETTERS[i]}
+      </Text>
+    ) : null;
+
+    if (interactive && onToggle) {
+      return (
+        <Pressable
+          key={i}
+          accessibilityRole="button"
+          accessibilityState={{ selected: on }}
+          accessibilityLabel={FULL_DAYS[i]}
+          onPress={() => onToggle(i)}
+          style={({ pressed }) => [
+            dotStyle,
+            pressed && styles.dotPressed,
+          ]}
+        >
+          {letterEl}
+        </Pressable>
+      );
+    }
+
+    return (
+      <View key={i} style={dotStyle}>
+        {letterEl}
+      </View>
+    );
+  }
+
+  return (
+    <View style={[styles.container, style]}>
+      {showLabels && !labelsInside && (
+        <View style={[styles.labelsRow, { gap }]}>
+          {LETTERS.map((letter, i) => (
+            <Text
+              key={i}
+              style={[styles.labelOutside, { width: dotSize }]}
+            >
+              {letter}
+            </Text>
+          ))}
+        </View>
+      )}
+
+      <View style={[styles.dotsRow, { gap }]}>
+        {pattern.map(renderDot)}
+      </View>
+    </View>
+  );
 }
 
-/* ─────────────────────────────────────────────────────────────────────
- * DEPLOYMENT SANITY CHECK
- *
- * Pseudo-usage for all 5 planned deployment sites. If a future API
- * change breaks any of these examples, it's breaking — needs migration.
- *
- *   Screen 5 — frequency (cadence, read-only, emphasized):
- *     <WeekStrip filled={3} selected />
- *
- *   Screen 6 — availability (interactive, labels inside large dots):
- *     <WeekStrip
- *       days={availableDays}
- *       onToggle={(i) => toggleDay(i)}
- *       labelsInside
- *       dotSize={48}
- *     />
- *
- *   Screen 9 — plan summary (read-only specific days, labels above):
- *     <WeekStrip days={planDays} showLabels selected />
- *
- *   Screen 11 — account creation (mini variant):
- *     <WeekStrip days={planDays} dotSize={6} gap={3} />
- *
- *   Screen 10 — building plan (animated fill): NOT IN v1 API.
- *   Deferred until screen 10 is built. Likely additions:
- *     - animateFillFrom?: readonly number[]   (indices in fill order)
- *     - animateRemainderAfter?: number        (ms; greys-out tail)
- *   Will require a fourth branch in the discriminated mode union.
- * ─────────────────────────────────────────────────────────────────────
- */
+// ─── Styles ───────────────────────────────────────────────────────────
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+  },
+  labelsRow: {
+    flexDirection: 'row',
+    marginBottom: 5,
+  },
+  dotsRow: {
+    flexDirection: 'row',
+  },
+  labelOutside: {
+    fontFamily: fonts.bodyMedium,
+    fontSize: 9.5,
+    color: palette.textVeryDim,
+    letterSpacing: 0.38,  // 0.04em × 9.5
+    textAlign: 'center',
+  },
+  dotPressed: {
+    transform: [{ scale: 0.94 }],
+  },
+});
