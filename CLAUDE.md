@@ -22,7 +22,7 @@ Standard Expo scripts: `npm start`, `npm run android`, `npm run ios`, `npm run w
 
 - **React Native + Expo + TypeScript** — Android primary, iOS secondary
 - **Supabase** — auth, PostgreSQL database, Row Level Security
-- **Expo Router** with `src/app/` directory layout (confirmed via scaffold)
+- Expo Router with src/app/ directory layout, organised into route groups (see "Project structure" below)
 
 ## Repo discipline
 
