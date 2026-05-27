@@ -11,9 +11,10 @@ import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { OnboardingCard } from '@/components/onboarding-card';
+import { GLYPH_NAMES, PathGlyph } from '@/components/path-glyph';
 import { TopChrome } from '@/components/top-chrome';
 import { WeekStrip } from '@/components/week-strip';
-import { fonts, palette, sizes, spacing } from '@/theme';
+import { fonts, palette, primary, sizes, spacing } from '@/theme';
 
 export default function Sandbox() {
   const [days, setDays] = useState<boolean[]>([
@@ -224,6 +225,59 @@ export default function Sandbox() {
           </Pressable>
         </View>
       </Section>
+
+      {/* ─── PathGlyph ─────────────────────────────────────────── */}
+
+      <Text style={styles.componentHeading}>PathGlyph</Text>
+
+      <Section title="All glyphs — unselected color (palette.textDim)">
+        <View style={styles.glyphRow}>
+          {GLYPH_NAMES.map((name) => (
+            <View key={name} style={styles.glyphCell}>
+              <PathGlyph name={name} size={32} color={palette.textDim} />
+              <Text style={styles.glyphLabel}>{name}</Text>
+            </View>
+          ))}
+        </View>
+      </Section>
+
+      <Section title="All glyphs — selected color (primary orange)">
+        <View style={styles.glyphRow}>
+          {GLYPH_NAMES.map((name) => (
+            <View key={name} style={styles.glyphCell}>
+              <PathGlyph name={name} size={32} color={primary} />
+              <Text style={styles.glyphLabel}>{name}</Text>
+            </View>
+          ))}
+        </View>
+      </Section>
+
+      <Section title="Composition — PathGlyph as leading in a tall card">
+        <OnboardingCard
+          variant="tall"
+          leading={
+            <PathGlyph
+              name="dashed-broken"
+              size={24}
+              color={palette.textDim}
+            />
+          }
+          title="I can jog a bit, then walk"
+          description="Stop-start rhythm — that's fine"
+          selected={false}
+          onPress={() => {}}
+        />
+        <OnboardingCard
+          variant="tall"
+          leading={
+            <PathGlyph name="dashed-broken" size={24} color={primary} />
+          }
+          title="I can jog a bit, then walk"
+          description="Stop-start rhythm — that's fine"
+          selected
+          onPress={() => {}}
+        />
+      </Section>
     </ScrollView>
   );
 }
@@ -322,6 +376,21 @@ const styles = StyleSheet.create({
   stepLabel: {
     fontFamily: fonts.body,
     fontSize: 13,
+    color: palette.textDim,
+  },
+  glyphRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.lg,
+    alignItems: 'flex-start',
+  },
+  glyphCell: {
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  glyphLabel: {
+    fontFamily: fonts.body,
+    fontSize: 10,
     color: palette.textDim,
   },
 });
