@@ -468,3 +468,10 @@ After every architectural pivot or scope change:
 2. Update relevant screen entries if the pivot affects them
 3. Update "Deferred" list if scope changed
 4. Commit with message: `docs: pivot — short description`
+
+---
+
+## Known dev quirks (web preview only)
+
+- **`Alert.alert` may not render in web preview.** Used by goal.tsx's `confirmQuit` handler on the close X. Works on real iOS/Android builds; react-native-web silently no-ops in some setups. Not a bug — accept until tested on a device.
+- **Deep-route browser refresh resets the navigation stack.** Refreshing the browser on `/(onboarding)/ability` (or any non-root onboarding screen) leaves the stack empty, so back arrow throws "GO_BACK was not handled." Dev-only warning, doesn't occur in production. When building real screens 3+, guard back handlers with `router.canGoBack()` and fall back to an explicit `router.replace` to the appropriate previous screen.
