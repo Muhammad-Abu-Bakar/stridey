@@ -7,14 +7,16 @@ import { router } from 'expo-router';
 import { TopChrome } from '@/components/top-chrome';
 import { palette, primary, radii, shadows, sizes, spacing, text } from '@/theme';
 
-const HERO_URI =
-  'https://images.unsplash.com/photo-A0iyW5nsoac?w=900&q=80&fit=crop';
-
 export default function Welcome() {
   return (
     <SafeAreaView style={styles.root} edges={['top', 'bottom']}>
       {/* No back, no step, no close — pre-onboarding chrome */}
       <TopChrome />
+
+      <View style={styles.wordmark}>
+        <View style={styles.wordmarkDot} />
+        <Text style={styles.wordmarkText}>Stridey</Text>
+      </View>
 
       <View style={styles.copy}>
         <Text style={styles.headline}>Hi Sam.</Text>
@@ -25,12 +27,14 @@ export default function Welcome() {
 
       <View style={styles.heroWrapper}>
         <Image
-          source={{ uri: HERO_URI }}
+          source={require('../../../assets/images/welcome-hero.jpg')}
           style={styles.hero}
           resizeMode="cover"
           accessibilityLabel="Runner silhouette at golden hour"
         />
       </View>
+
+      <View style={styles.spacer} />
 
       <View style={styles.footer}>
         <Pressable
@@ -51,10 +55,28 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: palette.bg,
   },
+  wordmark: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.xl,
+  },
+  wordmarkDot: {
+    width: 9,
+    height: 9,
+    borderRadius: 4.5,
+    backgroundColor: primary,
+  },
+  wordmarkText: {
+    ...text.brand,
+    color: palette.text,
+  },
   copy: {
     paddingHorizontal: spacing.xl,
-    paddingTop: spacing.xs,
     gap: spacing.xs,
+    marginBottom: spacing.xl,
   },
   headline: {
     ...text.h1,
@@ -65,13 +87,16 @@ const styles = StyleSheet.create({
     color: palette.textDim,
   },
   heroWrapper: {
-    flex: 1,
     marginHorizontal: spacing.md,
-    marginTop: spacing.lg,
     borderRadius: radii.lg,
     overflow: 'hidden',
+    aspectRatio: 0.85,
   },
   hero: {
+    width: '100%',
+    height: '100%',
+  },
+  spacer: {
     flex: 1,
   },
   footer: {
