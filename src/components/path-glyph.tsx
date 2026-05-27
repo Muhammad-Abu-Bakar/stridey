@@ -15,9 +15,15 @@
 //   hill-curve     → longer line with a pronounced peak (experienced)
 //   faint-dotted   → trailing dots, fading right (undecided / exploring)
 //
+// Glyphs (screen 10 — loader error state):
+//   broken-line    → two curved segments with a visible gap/break (snag)
+//
+// Glyphs (screen 12 — permissions):
+//   pin-trail      → location pin with dotted route trail (location permission)
+//   pulse-rings    → concentric rings expanding outward (notification permission)
+//
 // To add a glyph: append to GlyphName union + the `glyphs` map. The
-// component will pick it up automatically. Screens 10 (loader error)
-// and 12 (permissions) will register their glyphs here.
+// component will pick it up automatically.
 
 import { ReactNode } from 'react';
 import Svg, { Circle, G, Path } from 'react-native-svg';
@@ -28,7 +34,10 @@ export type GlyphName =
   | 'dashed-broken'
   | 'smooth-curve'
   | 'hill-curve'
-  | 'faint-dotted';
+  | 'faint-dotted'
+  | 'broken-line'
+  | 'pin-trail'
+  | 'pulse-rings';
 
 /** Runtime list — exported so sandbox/tests can iterate without duplication. */
 export const GLYPH_NAMES: readonly GlyphName[] = [
@@ -37,6 +46,9 @@ export const GLYPH_NAMES: readonly GlyphName[] = [
   'smooth-curve',
   'hill-curve',
   'faint-dotted',
+  'broken-line',
+  'pin-trail',
+  'pulse-rings',
 ] as const;
 
 const STROKE = 1.8;
@@ -98,6 +110,92 @@ const glyphs: Record<GlyphName, Renderer> = {
       <Circle cx={12} cy={12} r={1.2} fill={color} opacity={0.5} />
       <Circle cx={16.5} cy={12} r={1} fill={color} opacity={0.3} />
       <Circle cx={21} cy={12} r={0.8} fill={color} opacity={0.15} />
+    </G>
+  ),
+
+  // Two curved segments with a break in the middle; small diagonal slashes
+  // at the gap signal "snapped" rather than "deliberately spaced."
+  'broken-line': (color) => (
+    <G>
+      <Path
+        d="M2 12.5 C4.5 11.5 7 13 9.5 12"
+        stroke={color}
+        strokeWidth={STROKE}
+        strokeLinecap="round"
+        fill="none"
+      />
+      <Path
+        d="M14.5 12 C17 11 19.5 12.5 22 11.5"
+        stroke={color}
+        strokeWidth={STROKE}
+        strokeLinecap="round"
+        fill="none"
+      />
+      {/* break-point markers */}
+      <Path
+        d="M10.2 10 L9.5 14"
+        stroke={color}
+        strokeWidth={STROKE * 0.85}
+        strokeLinecap="round"
+        fill="none"
+      />
+      <Path
+        d="M13.8 10 L14.5 14"
+        stroke={color}
+        strokeWidth={STROKE * 0.85}
+        strokeLinecap="round"
+        fill="none"
+      />
+    </G>
+  ),
+
+  // Location pin (teardrop) with dotted route trail curving away from the
+  // base — "you are here, and the path continues."
+  'pin-trail': (color) => (
+    <G>
+      <Path
+        d="M12 15 C10 12 7 11 7 8 A5 5 0 0 1 17 8 C17 11 14 12 12 15Z"
+        stroke={color}
+        strokeWidth={STROKE}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        fill="none"
+      />
+      <Circle cx={12} cy={8} r={1.7} fill={color} />
+      <Path
+        d="M12 16 C13.5 17.5 17 18.5 21.5 18"
+        stroke={color}
+        strokeWidth={STROKE}
+        strokeLinecap="round"
+        strokeDasharray="2 2"
+        fill="none"
+      />
+    </G>
+  ),
+
+  // Concentric rings expanding from a center dot — pulse / beat metaphor
+  // for the notification permission card.
+  'pulse-rings': (color) => (
+    <G>
+      <Circle cx={12} cy={12} r={1.6} fill={color} />
+      <Circle
+        cx={12}
+        cy={12}
+        r={4.5}
+        stroke={color}
+        strokeWidth={STROKE}
+        fill="none"
+        opacity={0.65}
+      />
+      <Circle
+        cx={12}
+        cy={12}
+        r={8}
+        stroke={color}
+        strokeWidth={STROKE * 0.75}
+        fill="none"
+        opacity={0.3}
+      />
     </G>
   ),
 };
