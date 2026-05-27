@@ -45,7 +45,7 @@ export function OnboardingCard({
       ]}
     >
       {leading ? <View style={styles.leading}>{leading}</View> : null}
-      <Text style={styles.title} numberOfLines={1}>
+      <Text style={styles.title} numberOfLines={2}>
         {title}
       </Text>
       {description ? (
