@@ -63,6 +63,8 @@ Schema is **live** in the production Supabase project — see `docs/supabase-sch
 
 All tables have RLS enabled. `age_bracket` is intentionally absent (privacy promise on screen 4).
 
+**Plan duration:** `src/lib/onboarding/plan-duration.ts` is the single source of truth for session counts per goal; the `plan_templates` Supabase seed must mirror those values.
+
 ### Auth
 
 v1: Email + Google (Supabase Auth + `expo-auth-session` + `expo-crypto`). Password rule: 8+ characters, no complexity regex (NIST 800-63B). Apple sign-in deferred to iOS launch (mandatory by Apple's rule when any third-party social login is present).
