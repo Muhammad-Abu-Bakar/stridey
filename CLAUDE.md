@@ -85,6 +85,12 @@ Build these as standalone shared components from the start:
 - **Screen 10 (building loader):** WeekStrip animated fill — user's days fill in selection order (orange), then remaining days fill muted grey. Three phased headlines ~900ms each. Hard cap 4s. Error state at 6s soft timeout with "Retry" + "Use a starter plan" fallback
 - **Screen 12 (permissions):** `expo-location` (ACCESS_FINE_LOCATION only — no background), `expo-notifications`. Location denial → soft proceed + home banner. Notification denial → never re-prompt in-app. Persist grant state to AsyncStorage for cold-start checks.
 
+## Copy reconciliation (end of onboarding)
+
+Resolve these wording mismatches in a single copy pass once all onboarding screens are coded, then sync code and spec together:
+
+- **Screen 4 age privacy microcopy:** shipped as "Stays on this device — never uploaded." Spec (`docs/design-decisions.md` Screen 4) says "Stored on your device, never shared with third parties." Decide which wording wins and update the other.
+
 ## Deferred features (do not implement in v1.0)
 
 - "Help me choose" guided goal picker (stubs to General Fitness)
