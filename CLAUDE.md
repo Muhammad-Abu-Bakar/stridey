@@ -101,6 +101,11 @@ Resolve these wording mismatches in a single copy pass once all onboarding scree
   - A picked date flows back into the "Pick a date" card description and the "Plan ends …" line.
   - The returned date is not off-by-one — this is the specific thing being checked, since the local-time date handling (`fromISO` / `toISO` using local `Date` components, never `toISOString()`) is untested on a real device.
 
+- **Quit-confirm Alert (all onboarding screens)** — unverified on-device. `Alert.alert` is a no-op in react-native-web, so the TopChrome close (X) button appears to do nothing in web preview; this is a documented known quirk of the web target, not a bug. Verify on a development build:
+  - Tapping X on each onboarding screen shows the "Quit setup?" alert with Cancel and Quit actions.
+  - Tapping Quit routes to `/(tabs)` (not back, not a push — a `router.replace`).
+  - Tapping Cancel dismisses the alert and leaves the user on the current screen.
+
 ## Deferred features (do not implement in v1.0)
 
 - "Help me choose" guided goal picker (stubs to General Fitness)
