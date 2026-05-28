@@ -93,6 +93,14 @@ Resolve these wording mismatches in a single copy pass once all onboarding scree
 
 - **Screen 4 age privacy microcopy:** shipped as "Stays on this device — never uploaded." Spec (`docs/design-decisions.md` Screen 4) says "Stored on your device, never shared with third parties." Decide which wording wins and update the other.
 
+## Device-verification TODO
+
+- **Screen 7 native date picker** — unverified on-device. Web preview can't render `@react-native-community/datetimepicker` and Expo Go is blocked by an SDK/runtime mismatch. Verify on a development build:
+  - Picker opens when "Pick a date" card is tapped.
+  - `minimumDate={today}` enforces the floor — past dates are not selectable.
+  - A picked date flows back into the "Pick a date" card description and the "Plan ends …" line.
+  - The returned date is not off-by-one — this is the specific thing being checked, since the local-time date handling (`fromISO` / `toISO` using local `Date` components, never `toISOString()`) is untested on a real device.
+
 ## Deferred features (do not implement in v1.0)
 
 - "Help me choose" guided goal picker (stubs to General Fitness)
