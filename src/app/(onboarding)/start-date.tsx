@@ -10,37 +10,10 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { OnboardingCard } from '@/components/onboarding-card';
 import { PrimaryButton } from '@/components/primary-button';
 import { TopChrome } from '@/components/top-chrome';
+import { addDays, formatPretty, fromISO, toISO } from '@/lib/dates';
 import { planWeeks } from '@/lib/onboarding/plan-duration';
 import { useOnboardingStore } from '@/lib/onboarding/store';
 import { palette, spacing, text } from '@/theme';
-
-// ─── Date helpers (local-time only — no UTC conversions) ─────────────
-
-const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-const MONTHS   = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-
-function pad(n: number): string {
-  return n < 10 ? `0${n}` : `${n}`;
-}
-
-function toISO(d: Date): string {
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-}
-
-function fromISO(iso: string): Date {
-  const [y, m, d] = iso.split('-').map(Number);
-  return new Date(y, m - 1, d);
-}
-
-function addDays(d: Date, n: number): Date {
-  return new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
-}
-
-function formatPretty(d: Date): string {
-  return `${WEEKDAYS[d.getDay()]}, ${MONTHS[d.getMonth()]} ${d.getDate()}`;
-}
-
-// ─────────────────────────────────────────────────────────────────────
 
 function confirmQuit() {
   Alert.alert('Quit setup?', 'Your progress will be saved.', [
