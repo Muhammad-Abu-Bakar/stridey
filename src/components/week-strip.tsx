@@ -55,6 +55,8 @@ type CommonProps = {
   dotSize?: number;
   /** Horizontal gap between dots in dp. @default 6 (sizes.weekStripGap) */
   gap?: number;
+  /** Render full short day names (Mon/Tue/…) BELOW the dot row. @default false */
+  dayNamesBelow?: boolean;
   /** Style escape hatch on the outer wrapper. Use sparingly. */
   style?: ViewStyle;
 };
@@ -67,6 +69,7 @@ const LETTERS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'] as const;
 const FULL_DAYS = [
   'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday',
 ] as const;
+const SHORT_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as const;
 
 // Default cadence patterns for the 1–7 days-per-week range. Visual
 // rhythm only — the plan engine assigns real days later.
@@ -91,6 +94,7 @@ export function WeekStrip(props: WeekStripProps) {
     selected = false,
     showLabels = false,
     labelsInside = false,
+    dayNamesBelow = false,
     dotSize = sizes.weekStripDotInline,
     gap = sizes.weekStripGap,
     style,
@@ -199,6 +203,22 @@ export function WeekStrip(props: WeekStripProps) {
       <View style={[styles.dotsRow, { gap }]}>
         {pattern.map(renderDot)}
       </View>
+
+      {dayNamesBelow && (
+        <View style={[styles.dayNamesRow, { gap }]}>
+          {SHORT_DAYS.map((dayName, i) => (
+            <Text
+              key={i}
+              style={[
+                styles.dayNameLabel,
+                { width: dotSize, color: pattern[i] && emphasised ? primary : palette.textDim },
+              ]}
+            >
+              {dayName}
+            </Text>
+          ))}
+        </View>
+      )}
     </View>
   );
 }
@@ -227,5 +247,15 @@ const styles = StyleSheet.create({
   },
   dotPressed: {
     transform: [{ scale: 0.94 }],
+  },
+  dayNamesRow: {
+    flexDirection: 'row',
+    marginTop: sizes.weekStripGap,
+  },
+  dayNameLabel: {
+    fontFamily: fonts.bodyMedium,
+    fontSize: 9.5,
+    letterSpacing: 0.38,
+    textAlign: 'center',
   },
 });
