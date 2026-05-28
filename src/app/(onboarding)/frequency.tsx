@@ -1,15 +1,16 @@
 // src/app/(onboarding)/frequency.tsx — Screen 5
 
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 
 import { OnboardingCard } from '@/components/onboarding-card';
+import { PrimaryButton } from '@/components/primary-button';
 import { TopChrome } from '@/components/top-chrome';
 import { WeekStrip } from '@/components/week-strip';
 import { threeDayDescription } from '@/lib/onboarding/copy-by-goal';
 import { useOnboardingStore } from '@/lib/onboarding/store';
-import { palette, primary, radii, shadows, sizes, spacing, text } from '@/theme';
+import { palette, spacing, text } from '@/theme';
 
 function confirmQuit() {
   Alert.alert('Quit setup?', 'Your progress will be saved.', [
@@ -62,22 +63,11 @@ export default function FrequencyScreen() {
       </ScrollView>
 
       <View style={styles.footer}>
-        {/* TODO: extract shared Button */}
-        <Pressable
-          style={({ pressed }) => [
-            styles.cta,
-            !armed && styles.ctaMuted,
-            pressed && armed && styles.ctaPressed,
-          ]}
+        <PrimaryButton
+          label="Continue"
           onPress={() => router.push('/(onboarding)/days')}
           disabled={!armed}
-          accessibilityRole="button"
-          accessibilityLabel="Continue"
-        >
-          <Text style={[styles.ctaLabel, !armed && styles.ctaLabelMuted]}>
-            Continue
-          </Text>
-        </Pressable>
+        />
       </View>
     </SafeAreaView>
   );
@@ -106,22 +96,4 @@ const styles = StyleSheet.create({
     paddingTop: spacing.lg,
     paddingBottom: spacing.sm,
   },
-  cta: {
-    height: sizes.buttonHeight,
-    backgroundColor: primary,
-    borderRadius: radii.pill,
-    alignItems: 'center',
-    justifyContent: 'center',
-    ...shadows.primaryButton,
-  },
-  ctaMuted: {
-    backgroundColor: palette.cardBg,
-    borderWidth: 1,
-    borderColor: palette.border,
-    shadowOpacity: 0,
-    elevation: 0,
-  },
-  ctaPressed:     { opacity: 0.88 },
-  ctaLabel:       { ...text.button, color: palette.primaryText },
-  ctaLabelMuted:  { color: palette.textDim },
 });
