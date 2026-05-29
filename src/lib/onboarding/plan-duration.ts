@@ -57,3 +57,7 @@ export function planName(goal: Goal): string {
 export function planSessionMinutes(goal: Goal): number {
   return GOAL_SESSION_MINUTES[effectiveGoal(goal)];
 }
+
+export function planSlug(goal: Goal, frequency: WeeklyFrequency): string {
+  return `${effectiveGoal(goal)}-${frequency}day`;
+}
