@@ -79,6 +79,7 @@ interface OnboardingState {
   availableDays: AvailableDays | null;            // screen 6
   startDate: DateISO | null;                      // screen 7
   units: Units | null;                            // screen 8
+  templateId: string | null;                      // screen 10, resolved from plan_templates read
   locationPermission: PermissionStatus;           // screen 12
   notificationsPermission: PermissionStatus;      // screen 12
 
@@ -93,6 +94,7 @@ interface OnboardingActions {
   setAvailableDays: (v: AvailableDays) => void;
   setStartDate: (v: DateISO) => void;
   setUnits: (v: Units) => void;
+  setTemplateId: (v: string | null) => void;
   setLocationPermission: (v: PermissionStatus) => void;
   setNotificationsPermission: (v: PermissionStatus) => void;
   reset: () => void;
@@ -106,6 +108,7 @@ const INITIAL_STATE: OnboardingState = {
   availableDays: null,
   startDate: null,
   units: null,
+  templateId: null,
   locationPermission: 'not-asked',
   notificationsPermission: 'not-asked',
   hasHydrated: false,
@@ -125,6 +128,7 @@ export const useOnboardingStore = create<OnboardingState & OnboardingActions>()(
       setAvailableDays: (v) => set({ availableDays: v }),
       setStartDate: (v) => set({ startDate: v }),
       setUnits: (v) => set({ units: v }),
+      setTemplateId: (v) => set({ templateId: v }),
       setLocationPermission: (v) => set({ locationPermission: v }),
       setNotificationsPermission: (v) => set({ notificationsPermission: v }),
 
@@ -162,6 +166,7 @@ export const useWeeklyFrequency = () => useOnboardingStore((s) => s.weeklyFreque
 export const useAvailableDays = () => useOnboardingStore((s) => s.availableDays);
 export const useStartDate = () => useOnboardingStore((s) => s.startDate);
 export const useUnits = () => useOnboardingStore((s) => s.units);
+export const useTemplateId = () => useOnboardingStore((s) => s.templateId);
 export const useLocationPermission = () => useOnboardingStore((s) => s.locationPermission);
 export const useNotificationsPermission = () => useOnboardingStore((s) => s.notificationsPermission);
 export const useHasHydrated = () => useOnboardingStore((s) => s.hasHydrated);
