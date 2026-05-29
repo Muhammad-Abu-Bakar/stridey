@@ -6,9 +6,9 @@
 //   Cadence (read-only):       <WeekStrip filled={3} />
 //   Specific-days read-only:   <WeekStrip days={[...]} showLabels />
 //   Specific-days interactive: <WeekStrip days={[...]} onToggle={fn} />
+//   Animated fill (read-only): <WeekStrip fillStates={[...]} />
 //
-// Used on onboarding screens 5, 6, 9, 10, 11. Animated mode for
-// screen 10 is deferred — will require a fourth mode branch.
+// Used on onboarding screens 5, 6, 9, 10, 11.
 
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { ViewStyle } from 'react-native';
@@ -18,28 +18,43 @@ import { fonts, palette, primary, sizes } from '@/theme';
 
 export type DaysOfWeek = readonly boolean[];
 
+export type DotFillState = 'empty' | 'user' | 'filler';
+
 type CadenceModeProps = {
   filled: number;
   days?: never;
   onToggle?: never;
+  fillStates?: never;
 };
 
 type SpecificDaysReadOnlyProps = {
   days: DaysOfWeek;
   filled?: never;
   onToggle?: never;
+  fillStates?: never;
 };
 
 type SpecificDaysInteractiveProps = {
   days: DaysOfWeek;
   onToggle: (dayIndex: number) => void;
   filled?: never;
+  fillStates?: never;
+};
+
+type AnimatedFillModeProps = {
+  /** Per-dot fill state, length 7 (Mon=0…Sun=6). 'user' = orange (chosen
+   *  day), 'filler' = muted grey, 'empty' = unfilled outline. */
+  fillStates: readonly DotFillState[];
+  filled?: never;
+  days?: never;
+  onToggle?: never;
 };
 
 type ModeProps =
   | CadenceModeProps
   | SpecificDaysReadOnlyProps
-  | SpecificDaysInteractiveProps;
+  | SpecificDaysInteractiveProps
+  | AnimatedFillModeProps;
 
 type CommonProps = {
   /** Read-only emphasis. Filled dots use primary at full opacity when true,
@@ -101,7 +116,39 @@ export function WeekStrip(props: WeekStripProps) {
     days,
     filled,
     onToggle,
+    fillStates,
   } = props;
+
+  // ── Animated-fill mode — dedicated render path, no shared logic below ──
+  if (fillStates !== undefined) {
+    if (__DEV__ && fillStates.length !== 7) {
+      console.warn(
+        `WeekStrip: \`fillStates\` must be length 7, got ${fillStates.length}.`
+      );
+    }
+    return (
+      <View style={[styles.container, style]}>
+        <View style={[styles.dotsRow, { gap }]}>
+          {fillStates.map((state, i) => (
+            <View
+              key={i}
+              style={{
+                width: dotSize,
+                height: dotSize,
+                borderRadius: dotSize / 2,
+                backgroundColor:
+                  state === 'user' ? primary
+                  : state === 'filler' ? palette.textDim
+                  : 'transparent',
+                borderWidth: state === 'empty' ? sizes.weekStripBorderWidth : 0,
+                borderColor: state === 'empty' ? palette.border : 'transparent',
+              }}
+            />
+          ))}
+        </View>
+      </View>
+    );
+  }
 
   // Dev-only length check on `days`. Caught during development, silent
   // in production builds where __DEV__ is false.

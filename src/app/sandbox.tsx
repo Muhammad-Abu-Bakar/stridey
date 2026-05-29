@@ -83,6 +83,19 @@ export default function Sandbox() {
         />
       </Section>
 
+      <Section title="Animated-fill — static frame A (Mon+Wed orange, Sat grey, rest empty)">
+        <WeekStrip
+          fillStates={['user', 'empty', 'user', 'empty', 'empty', 'filler', 'empty']}
+        />
+      </Section>
+
+      <Section title="Animated-fill — static frame B (all three states, larger dots)">
+        <WeekStrip
+          fillStates={['user', 'user', 'filler', 'filler', 'filler', 'empty', 'empty']}
+          dotSize={sizes.weekStripDotInteractive}
+        />
+      </Section>
+
       {/* ─── OnboardingCard ────────────────────────────────────── */}
 
       <Text style={styles.componentHeading}>OnboardingCard</Text>
