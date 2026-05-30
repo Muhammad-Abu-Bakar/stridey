@@ -11,7 +11,7 @@ import { OnboardingCard } from '@/components/onboarding-card';
 import { PrimaryButton } from '@/components/primary-button';
 import { TopChrome } from '@/components/top-chrome';
 import { addDays, formatPretty, fromISO, toISO } from '@/lib/dates';
-import { planWeeks } from '@/lib/onboarding/plan-duration';
+import { computePlanEndISO } from '@/lib/onboarding/plan-duration';
 import { useOnboardingStore } from '@/lib/onboarding/store';
 import { palette, spacing, text } from '@/theme';
 
@@ -44,7 +44,7 @@ export default function StartDateScreen() {
 
   const planEndISO =
     goal && weeklyFrequency
-      ? toISO(addDays(fromISO(selectedISO), planWeeks(goal, weeklyFrequency) * 7 - 1))
+      ? computePlanEndISO(goal, weeklyFrequency, selectedISO)
       : null;
 
   return (

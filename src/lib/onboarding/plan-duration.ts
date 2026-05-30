@@ -10,8 +10,9 @@
 // breaks this invariant, planWeeks() must be revisited — it will silently
 // return a fractional week otherwise.
 
+import { addDays, fromISO, toISO } from '@/lib/dates';
 import { effectiveGoal } from '@/lib/onboarding/store';
-import type { Goal, WeeklyFrequency } from '@/lib/onboarding/store';
+import type { Goal, WeeklyFrequency, DateISO } from '@/lib/onboarding/store';
 
 // ─── Per-goal metadata ───────────────────────────────────────────────
 // All tables typed as Record<Exclude<Goal, 'help-me-choose'>, T> so the
@@ -60,4 +61,12 @@ export function planSessionMinutes(goal: Goal): number {
 
 export function planSlug(goal: Goal, frequency: WeeklyFrequency): string {
   return `${effectiveGoal(goal)}-${frequency}day`;
+}
+
+export function computePlanEndISO(
+  goal: Goal,
+  frequency: WeeklyFrequency,
+  startISO: DateISO,
+): DateISO {
+  return toISO(addDays(fromISO(startISO), planWeeks(goal, frequency) * 7 - 1));
 }
