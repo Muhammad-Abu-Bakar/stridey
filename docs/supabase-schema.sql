@@ -26,6 +26,8 @@ create table user_plans (
   template_id uuid references plan_templates not null,
   start_date date not null,
   end_date date not null,
+  -- Snapshots onboarding inputs the session generator needs (available_days, starting_point); ageBucket excluded per Screen 4 privacy promise.
+  generation_inputs jsonb,
   status text default 'active' check (status in ('active','completed','abandoned')),
   created_at timestamptz default now()
 );
