@@ -37,7 +37,7 @@ const NEXT_ROUTE = '/(onboarding)/account-create' as Href;
 function confirmQuit() {
   Alert.alert('Quit setup?', 'Your progress will be saved.', [
     { text: 'Cancel', style: 'cancel' },
-    { text: 'Quit', style: 'destructive', onPress: () => router.replace('/(tabs)') },
+    { text: 'Quit', style: 'destructive', onPress: () => router.replace('/home') },
   ]);
 }
 

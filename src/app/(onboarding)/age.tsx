@@ -30,7 +30,7 @@ function confirmQuit() {
     {
       text: 'Quit',
       style: 'destructive',
-      onPress: () => router.replace('/(tabs)'),
+      onPress: () => router.replace('/home'),
     },
   ]);
 }

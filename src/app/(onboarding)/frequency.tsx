@@ -15,7 +15,7 @@ import { palette, spacing, text } from '@/theme';
 function confirmQuit() {
   Alert.alert('Quit setup?', 'Your progress will be saved.', [
     { text: 'Cancel', style: 'cancel' },
-    { text: 'Quit', style: 'destructive', onPress: () => router.replace('/(tabs)') },
+    { text: 'Quit', style: 'destructive', onPress: () => router.replace('/home') },
   ]);
 }
 
