@@ -475,3 +475,22 @@ After every architectural pivot or scope change:
 
 - **`Alert.alert` may not render in web preview.** Used by goal.tsx's `confirmQuit` handler on the close X. Works on real iOS/Android builds; react-native-web silently no-ops in some setups. Not a bug — accept until tested on a device.
 - **Deep-route browser refresh resets the navigation stack.** Refreshing the browser on `/(onboarding)/ability` (or any non-root onboarding screen) leaves the stack empty, so back arrow throws "GO_BACK was not handled." Dev-only warning, doesn't occur in production. When building real screens 3+, guard back handlers with `router.canGoBack()` and fall back to an explicit `router.replace` to the appropriate previous screen.
+
+## Home screen (Phase 2 — shipped)
+
+Plan-level only; no sessions or runs exist yet. Reads the active plan via `useActivePlan` (auth-gated read of `user_plans` WHERE status = 'active', most recent by created_at, embedding `plan_templates(title, weeks)`).
+
+Title: `plan_templates.title` verbatim (e.g. "First 5K" — no "Plan" suffix unless the seed adds it).
+
+Week-math (calendar-only; single source of truth for plan progress). With d = daysBetween(start_date, today), today = fromISO(toISO(new Date())), T = weeks:
+- d < 0 -> pre: currentWeek 0, weeksToGo T, progress 0. Subtitle "Starts {Wkdy, Mon D}", left label "Starts {Mon D}".
+- d >= T*7 (or status complete) -> complete: currentWeek T, weeksToGo 0, progress 1. Labels "Plan complete".
+- else -> active: currentWeek = min(T, floor(d/7)+1); weeksToGo = T - currentWeek; progress = min(1, (d+1)/(T*7)). Subtitle "Week N of T - {Mon D} to {Mon D}".
+- Right label: weeksToGo>0 -> "N weeks to go" (singular "1 week to go"); 0 & active -> "Final week"; complete -> "Plan complete".
+- Left label phase-aware: "Starts" (pre) vs "Started" (otherwise).
+
+Training days: WeekStrip days={availableDays} selected showLabels -- rhythm only. The primitive has no calendar dates or today-ring; a dated strip is a deferred enhancement, not built.
+
+Dropped: the "View full plan" CTA -- redundant with the Plan tab, no real action.
+
+Deferred (step 3b): the location-denied banner (permissions decision ~L309). Pending permission-state wiring; its "...to record runs" copy points at run recording, which isn't built yet.
