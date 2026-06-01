@@ -1,98 +1,187 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import { WeekStrip } from '@/components/week-strip';
+import { fromISO, toISO, formatPretty, formatShort, daysBetween } from '@/lib/dates';
+import { useActivePlan } from '@/lib/plan/use-active-plan';
+import { palette, primary, radii, spacing, text } from '@/theme';
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
+type Phase = 'pre' | 'active' | 'complete';
+
+type Progress = {
+  phase: Phase;
+  currentWeek: number;
+  weeksToGo: number;
+  progress: number;
+};
+
+function planProgress(startISO: string, weeks: number, today: Date): Progress {
+  const d = daysBetween(fromISO(startISO), today);
+  if (d < 0) {
+    return { phase: 'pre', currentWeek: 0, weeksToGo: weeks, progress: 0 };
   }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
+  if (d >= weeks * 7) {
+    return { phase: 'complete', currentWeek: weeks, weeksToGo: 0, progress: 1 };
   }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
-  return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
+  const currentWeek = Math.min(weeks, Math.floor(d / 7) + 1);
+  return {
+    phase: 'active',
+    currentWeek,
+    weeksToGo: weeks - currentWeek,
+    progress: Math.min(1, (d + 1) / (weeks * 7)),
+  };
+}
+
+function leftLabel(phase: Phase, start: Date): string {
+  return phase === 'pre' ? `Starts ${formatShort(start)}` : `Started ${formatShort(start)}`;
+}
+
+function rightLabel(phase: Phase, weeksToGo: number): string {
+  if (weeksToGo > 0) return weeksToGo === 1 ? '1 week to go' : `${weeksToGo} weeks to go`;
+  if (phase === 'active') return 'Final week';
+  return 'Plan complete';
 }
 
 export default function HomeScreen() {
-  return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
+  const state = useActivePlan();
 
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
-
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
-
-        {Platform.OS === 'web' && <WebBadge />}
+  if (state.kind === 'loading') {
+    return (
+      <SafeAreaView style={styles.root}>
+        <ActivityIndicator color={primary} style={styles.centered} />
       </SafeAreaView>
-    </ThemedView>
+    );
+  }
+
+  if (state.kind === 'error') {
+    return (
+      <SafeAreaView style={styles.root}>
+        <Text style={[styles.centered, text.body, { color: palette.text }]}>
+          Couldn't load your plan.
+        </Text>
+      </SafeAreaView>
+    );
+  }
+
+  if (state.kind === 'no-plan') {
+    return (
+      <SafeAreaView style={styles.root}>
+        <Text style={[styles.centered, text.body, { color: palette.textDim }]}>
+          No active plan yet.
+        </Text>
+      </SafeAreaView>
+    );
+  }
+
+  const { plan } = state;
+  const today = fromISO(toISO(new Date()));
+  const start = fromISO(plan.startDate);
+  const end = fromISO(plan.endDate);
+  const { phase, currentWeek, weeksToGo, progress } = planProgress(plan.startDate, plan.weeks, today);
+
+  const subtitle =
+    phase === 'active'
+      ? `Week ${currentWeek} of ${plan.weeks} · ${formatShort(start)} – ${formatShort(end)}`
+      : phase === 'pre'
+      ? `Starts ${formatPretty(start)}`
+      : `Plan complete · ${formatShort(start)} – ${formatShort(end)}`;
+
+  return (
+    <SafeAreaView style={styles.root} edges={['top', 'bottom']}>
+      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+
+        <Text style={styles.eyebrow}>ACTIVE PLAN</Text>
+        <Text style={styles.title}>{plan.title}</Text>
+        <Text style={styles.subtitle}>{subtitle}</Text>
+
+        <View style={styles.card}>
+          <Text style={styles.cardLabel}>PLAN PROGRESS</Text>
+          <View style={styles.track}>
+            <View style={[styles.fill, { width: `${progress * 100}%` }]} />
+          </View>
+          <View style={styles.progressRow}>
+            <Text style={styles.progressText}>{leftLabel(phase, start)}</Text>
+            <Text style={styles.progressText}>{rightLabel(phase, weeksToGo)}</Text>
+          </View>
+        </View>
+
+        <Text style={styles.sectionLabel}>YOUR TRAINING DAYS</Text>
+        <WeekStrip days={plan.availableDays} selected showLabels />
+
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  root: {
     flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
+    backgroundColor: palette.bg,
   },
-  safeArea: {
+  centered: {
     flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
+    textAlign: 'center',
+    alignSelf: 'center',
   },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
+  scroll: {
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing.xxl,
+    gap: spacing.xs,
+  },
+  eyebrow: {
+    ...text.caption,
+    color: palette.textVeryDim,
+    textTransform: 'uppercase',
+    letterSpacing: 0.6,
   },
   title: {
-    textAlign: 'center',
+    ...text.h1,
+    color: palette.text,
+    marginTop: spacing.xxs,
   },
-  code: {
+  subtitle: {
+    ...text.body,
+    color: palette.textDim,
+  },
+  card: {
+    marginTop: spacing.sm,
+    padding: spacing.md,
+    borderRadius: radii.lg,
+    backgroundColor: palette.cardBg,
+    gap: spacing.xs,
+  },
+  cardLabel: {
+    ...text.caption,
+    color: palette.textVeryDim,
     textTransform: 'uppercase',
+    letterSpacing: 0.6,
   },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
+  track: {
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: palette.border,
+    overflow: 'hidden',
+  },
+  fill: {
+    height: '100%',
+    backgroundColor: primary,
+    borderRadius: 3,
+  },
+  progressRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  progressText: {
+    ...text.caption,
+    color: palette.textDim,
+  },
+  sectionLabel: {
+    ...text.caption,
+    color: palette.textVeryDim,
+    textTransform: 'uppercase',
+    letterSpacing: 0.6,
+    marginTop: spacing.lg,
+    marginBottom: spacing.xs,
   },
 });

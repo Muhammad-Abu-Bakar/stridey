@@ -23,3 +23,11 @@ export function addDays(d: Date, n: number): Date {
 export function formatPretty(d: Date): string {
   return `${WEEKDAYS[d.getDay()]}, ${MONTHS[d.getMonth()]} ${d.getDate()}`;
 }
+
+export function daysBetween(a: Date, b: Date): number {
+  return Math.round((b.getTime() - a.getTime()) / 86400000);
+}
+
+export function formatShort(d: Date): string {
+  return `${MONTHS[d.getMonth()]} ${d.getDate()}`;
+}
