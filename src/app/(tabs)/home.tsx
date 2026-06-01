@@ -3,36 +3,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { LocationBanner } from '@/components/location-banner';
 import { WeekStrip } from '@/components/week-strip';
-import { fromISO, toISO, formatPretty, formatShort, daysBetween } from '@/lib/dates';
+import { fromISO, toISO, formatPretty, formatShort } from '@/lib/dates';
+import { Phase, planProgress } from '@/lib/plan/plan-progress';
 import { useActivePlan } from '@/lib/plan/use-active-plan';
 import { useLocationPermission } from '@/lib/permissions/use-location-permission';
 import { palette, primary, radii, spacing, text } from '@/theme';
-
-type Phase = 'pre' | 'active' | 'complete';
-
-type Progress = {
-  phase: Phase;
-  currentWeek: number;
-  weeksToGo: number;
-  progress: number;
-};
-
-function planProgress(startISO: string, weeks: number, today: Date): Progress {
-  const d = daysBetween(fromISO(startISO), today);
-  if (d < 0) {
-    return { phase: 'pre', currentWeek: 0, weeksToGo: weeks, progress: 0 };
-  }
-  if (d >= weeks * 7) {
-    return { phase: 'complete', currentWeek: weeks, weeksToGo: 0, progress: 1 };
-  }
-  const currentWeek = Math.min(weeks, Math.floor(d / 7) + 1);
-  return {
-    phase: 'active',
-    currentWeek,
-    weeksToGo: weeks - currentWeek,
-    progress: Math.min(1, (d + 1) / (weeks * 7)),
-  };
-}
 
 function leftLabel(phase: Phase, start: Date): string {
   return phase === 'pre' ? `Starts ${formatShort(start)}` : `Started ${formatShort(start)}`;
