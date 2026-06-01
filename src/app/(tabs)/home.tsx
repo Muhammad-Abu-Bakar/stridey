@@ -1,9 +1,11 @@
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { LocationBanner } from '@/components/location-banner';
 import { WeekStrip } from '@/components/week-strip';
 import { fromISO, toISO, formatPretty, formatShort, daysBetween } from '@/lib/dates';
 import { useActivePlan } from '@/lib/plan/use-active-plan';
+import { useLocationPermission } from '@/lib/permissions/use-location-permission';
 import { palette, primary, radii, spacing, text } from '@/theme';
 
 type Phase = 'pre' | 'active' | 'complete';
@@ -44,6 +46,7 @@ function rightLabel(phase: Phase, weeksToGo: number): string {
 
 export default function HomeScreen() {
   const state = useActivePlan();
+  const { granted, fix } = useLocationPermission();
 
   if (state.kind === 'loading') {
     return (
@@ -89,6 +92,8 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={styles.root} edges={['top', 'bottom']}>
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+
+        {!granted && <LocationBanner onPress={fix} />}
 
         <Text style={styles.eyebrow}>ACTIVE PLAN</Text>
         <Text style={styles.title}>{plan.title}</Text>
