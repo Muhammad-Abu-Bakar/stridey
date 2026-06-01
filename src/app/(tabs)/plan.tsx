@@ -124,7 +124,7 @@ const styles = StyleSheet.create({
   planTitle: {
     ...text.body,
     color: palette.text,
-    fontWeight: '600',
+    fontFamily: fonts.bodySemiBold,
   },
   planSubtitle: {
     ...text.body,
@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
     color: palette.text,
   },
   weekLabelFocus: {
-    fontWeight: '600',
+    fontFamily: fonts.bodySemiBold,
   },
   weekRange: {
     ...text.caption,
