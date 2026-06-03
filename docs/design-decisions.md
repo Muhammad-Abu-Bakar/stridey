@@ -508,3 +508,24 @@ Deferred (step 3b): the location-denied banner (permissions decision ~L309). Pen
 **`runs` schema (design first):** summary fields always — distance, duration, avg pace, start + end timestamps. GPS trace (point array) optional, added only if/when the route map is.
 
 **Deferred:** session-linking of runs, live route map, the sessions generated-vs-authored fork.
+
+## Run recording — free-run v1 (shipped 2026-06-03)
+
+Free-run recording works end-to-end: verified on a physical Android device and persisting to Supabase. No plan/session link yet (free runs only).
+
+**Architecture (layered, bottom-up):**
+- `src/lib/runs/location-source.ts` — `LocationSource` abstraction + `createForegroundLocationSource()` (foreground `watchPositionAsync`; accuracy High, timeInterval 2000, distanceInterval 5). This is the swap seam: a background source can implement the same interface later without touching the recorder.
+- `src/lib/runs/geo.ts` — pure `haversineMeters(a,b)` and `avgPaceSecPerKm(distanceM, durationS)` (null when distance is 0).
+- `src/lib/runs/use-run-recorder.ts` — state machine idle → running → paused → finished. Refs are the source of truth; a 1s interval syncs them into display state. Distance accumulates via haversine with jitter filtering (drops accuracy > 30m and segments < 1m). Active duration excludes paused time; resume re-anchors `lastSample` so the pause gap isn't counted. Collects accepted samples for the route.
+- `src/app/run.tsx` — live run screen (pushed over tabs, header hidden). `useKeepAwake`, inline foreground-permission request on Start, start/pause/resume/finish controls, and a "?" tooltip explaining the metrics. Display is km-only for now.
+- `src/lib/runs/save-run.ts` — on Finish, inserts into `runs`: `user_id` from session, ISO timestamps, `distance_m` rounded to int, `route_geojson` as a GeoJSON Feature/LineString with `[lng, lat]` coords rounded to 5 dp (≥2 points, else null). RLS insert passes since `user_id = auth.uid()`.
+- Entry point: a "Start a run" button on Home → `router.push('/run')`.
+
+**Tracking mode:** FOREGROUND ONLY (interim). The logged target is BACKGROUND — swap an `expo-task-manager` background task into the location source. Foreground stops when the screen sleeps; `expo-keep-awake` mitigates while the screen is up.
+
+**Known limits / deferred:**
+- Background tracking — next up (bg-location permission, foreground service + notification, Play declaration).
+- Offline save — a failed insert loses the run; no offline queue yet.
+- Units — display is km only; `profiles.units = 'mi'` not respected yet.
+- Run history + real Profile stats — not built (Profile still shows the empty state).
+- Session-linking (`plan_session_id`) and the sessions generated-vs-authored fork — still deferred.
