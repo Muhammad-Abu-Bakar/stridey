@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { View, Text, Pressable, StyleSheet, Alert } from 'react-native';
+import { View, Text, Pressable, StyleSheet, Alert, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack, router } from 'expo-router';
 import { useKeepAwake } from 'expo-keep-awake';
@@ -29,6 +29,7 @@ function formatDistanceKm(m: number): string {
 export default function RunScreen() {
   useKeepAwake();
   const run = useRunRecorder();
+  const [infoOpen, setInfoOpen] = useState(false);
 
   async function onStart() {
     const { granted } = await Location.requestForegroundPermissionsAsync();
@@ -68,9 +69,47 @@ export default function RunScreen() {
       <SafeAreaView edges={['top', 'bottom']} style={styles.safe}>
         <View style={styles.container}>
           {/* Top row */}
-          <Pressable onPress={onCancel} style={styles.closeBtn} hitSlop={12}>
-            <Text style={styles.closeText}>✕</Text>
-          </Pressable>
+          <View style={styles.topRow}>
+            <Pressable onPress={onCancel} style={styles.closeBtn} hitSlop={12}>
+              <Text style={styles.closeText}>✕</Text>
+            </Pressable>
+            <Pressable onPress={() => setInfoOpen(true)} style={styles.helpBtn} hitSlop={12}>
+              <Text style={styles.helpText}>?</Text>
+            </Pressable>
+          </View>
+
+          <Modal
+            transparent
+            animationType="fade"
+            visible={infoOpen}
+            onRequestClose={() => setInfoOpen(false)}
+          >
+            <View style={styles.modalBackdrop}>
+              <View style={styles.modalCard}>
+                <Text style={styles.modalTitle}>What these mean</Text>
+
+                <View style={styles.infoBlock}>
+                  <Text style={styles.infoLabel}>Time</Text>
+                  <Text style={styles.infoDesc}>Total time for this run. Paused time isn't counted.</Text>
+                </View>
+                <View style={styles.infoBlock}>
+                  <Text style={styles.infoLabel}>Distance (km)</Text>
+                  <Text style={styles.infoDesc}>How far you've travelled.</Text>
+                </View>
+                <View style={styles.infoBlock}>
+                  <Text style={styles.infoLabel}>Pace (/km)</Text>
+                  <Text style={styles.infoDesc}>Minutes to cover one kilometre. Lower is faster.</Text>
+                </View>
+
+                <Pressable
+                  onPress={() => setInfoOpen(false)}
+                  style={({ pressed }) => [styles.modalBtn, pressed && styles.pressed]}
+                >
+                  <Text style={styles.modalBtnText}>Got it</Text>
+                </Pressable>
+              </View>
+            </View>
+          </Modal>
 
           {/* Middle: stats */}
           <View style={styles.middle}>
@@ -157,12 +196,69 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: spacing.md,
   },
-  closeBtn: {
-    alignSelf: 'flex-start',
+  topRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
+  closeBtn: {},
   closeText: {
     fontSize: 24,
     color: palette.textDim,
+  },
+  helpBtn: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: palette.border,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  helpText: {
+    color: palette.textDim,
+    fontSize: 16,
+    fontFamily: fonts.bodySemiBold,
+  },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    padding: spacing.lg,
+  },
+  modalCard: {
+    backgroundColor: palette.secondaryBg,
+    borderRadius: radii.lg,
+    padding: spacing.lg,
+  },
+  modalTitle: {
+    fontFamily: fonts.displaySemiBold,
+    color: palette.secondaryText,
+    fontSize: 18,
+  },
+  infoBlock: {
+    marginTop: spacing.md,
+  },
+  infoLabel: {
+    fontFamily: fonts.bodySemiBold,
+    color: palette.secondaryText,
+  },
+  infoDesc: {
+    ...text.caption,
+    color: 'rgba(14, 20, 20, 0.65)',
+    marginTop: spacing.xxs,
+  },
+  modalBtn: {
+    marginTop: spacing.lg,
+    backgroundColor: primary,
+    borderRadius: radii.pill,
+    height: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalBtnText: {
+    fontFamily: fonts.displaySemiBold,
+    color: palette.primaryText,
   },
   middle: {
     flex: 1,
