@@ -1,5 +1,6 @@
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { router } from 'expo-router';
 
 import { LocationBanner } from '@/components/location-banner';
 import { WeekStrip } from '@/components/week-strip';
@@ -7,7 +8,7 @@ import { fromISO, toISO, formatPretty, formatShort } from '@/lib/dates';
 import { Phase, planProgress } from '@/lib/plan/plan-progress';
 import { useActivePlan } from '@/lib/plan/use-active-plan';
 import { useLocationPermission } from '@/lib/permissions/use-location-permission';
-import { palette, primary, radii, spacing, text } from '@/theme';
+import { palette, primary, fonts, radii, spacing, text } from '@/theme';
 
 function leftLabel(phase: Phase, start: Date): string {
   return phase === 'pre' ? `Starts ${formatShort(start)}` : `Started ${formatShort(start)}`;
@@ -69,6 +70,13 @@ export default function HomeScreen() {
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
 
         {!granted && <LocationBanner onPress={fix} />}
+
+        <Pressable
+          onPress={() => router.push('/run')}
+          style={({ pressed }) => [styles.startBtn, pressed && styles.pressed]}
+        >
+          <Text style={styles.startBtnText}>Start a run</Text>
+        </Pressable>
 
         <Text style={styles.eyebrow}>ACTIVE PLAN</Text>
         <Text style={styles.title}>{plan.title}</Text>
@@ -155,6 +163,22 @@ const styles = StyleSheet.create({
   progressText: {
     ...text.caption,
     color: palette.textDim,
+  },
+  startBtn: {
+    backgroundColor: primary,
+    borderRadius: radii.pill,
+    height: 56,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.md,
+  },
+  startBtnText: {
+    fontFamily: fonts.displaySemiBold,
+    color: palette.primaryText,
+    fontSize: 16,
+  },
+  pressed: {
+    opacity: 0.7,
   },
   sectionLabel: {
     ...text.caption,
