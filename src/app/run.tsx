@@ -5,6 +5,7 @@ import { Stack, router } from 'expo-router';
 import { useKeepAwake } from 'expo-keep-awake';
 import * as Location from 'expo-location';
 import { useRunRecorder } from '@/lib/runs/use-run-recorder';
+import { saveRun } from '@/lib/runs/save-run';
 import { palette, primary, fonts, spacing, radii, text } from '@/theme';
 
 function formatDuration(totalS: number): string {
@@ -42,7 +43,13 @@ export default function RunScreen() {
 
   async function onFinish() {
     const summary = await run.stop();
-    console.log('[run] summary', summary);
+    try {
+      await saveRun(summary);
+      console.log('[run] saved');
+    } catch (e) {
+      console.warn('[run] save failed', e);
+      Alert.alert('Save failed', "Couldn't save this run — check your connection and try again.");
+    }
   }
 
   function onCancel() {
