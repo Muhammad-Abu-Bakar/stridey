@@ -494,3 +494,17 @@ Training days: WeekStrip days={availableDays} selected showLabels -- rhythm only
 Dropped: the "View full plan" CTA -- redundant with the Plan tab, no real action.
 
 Deferred (step 3b): the location-denied banner (permissions decision ~L309). Pending permission-state wiring; its "...to record runs" copy points at run recording, which isn't built yet.
+
+## Run recording (decided 2026-06-03 — not yet built)
+
+**Scope (v1):** Free runs only — open a tracker, run, stop, save to `runs`. No session/plan link yet (waits on the generated-vs-authored sessions fork, still deferred). Stats-only: live time, distance, pace. No live map in v1 (keeps `react-native-maps` out, protects the ~50-70 MB size target); route map is a later layer.
+
+**Tracking mode: BACKGROUND.** Tracking continues with the screen off / app backgrounded — the real running-app behavior. Foreground-only was rejected because it stops the moment the phone locks, which is useless for actual runs.
+
+**Cost of background (accepted):** `expo-location` background updates + `expo-task-manager`; `ACCESS_BACKGROUND_LOCATION` permission; an Android foreground service with a persistent notification while a run is active; a Google Play background-location declaration at submission.
+
+**Build approach:** Foreground slice first — full run flow (start/pause/resume/stop), live stats, save-to-`runs` — behind a location-source abstraction. Then swap in the background task without touching the run logic. De-risks the hard part.
+
+**`runs` schema (design first):** summary fields always — distance, duration, avg pace, start + end timestamps. GPS trace (point array) optional, added only if/when the route map is.
+
+**Deferred:** session-linking of runs, live route map, the sessions generated-vs-authored fork.
